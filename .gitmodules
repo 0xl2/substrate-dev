@@ -1,0 +1,4 @@
+[submodule "blockchain/chain/polkadot"]
+	path = blockchain/chain/polkadot
+	url = https://github.com/paritytech/polkadot.git
+	branch = release-v0.9.11

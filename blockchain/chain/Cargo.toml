@@ -1,0 +1,88 @@
+[[bin]]
+name = "catena"
+path = "src/main.rs"
+
+[package]
+name = "catena"
+description = "Catena blockchain network"
+license = "GPL-3.0-only"
+version = "0.1.0"
+authors = ["Zheng"]
+edition = "2018"
+readme = "README.md"
+
+[dependencies]
+catena-cli = { path = "cli" }
+color-eyre = { version = "0.5.11", default-features = false }
+parity-util-mem = { version = "*", default-features = false, features = ["jemalloc-global"] }
+
+[dev-dependencies]
+assert_cmd = "1.0.2"
+nix = "0.19.1"
+tempfile = "3.2.0"
+
+[workspace]
+members = [
+  "cli",
+  "runtime",
+  "node/client",
+  "node/service",
+  "polkadot/*"
+]
+
+# We want to be able to build the bridge relayer without pulling it (and all of its
+# dependencies into the Catena workspace)
+exclude = [
+  "polkadot",
+  "polkadot/runtime/test-runtime",
+  "polkadot/bridges/relays/bin-substrate",
+  "polkadot/bridges/bin/rialto/runtime",
+  "polkadot/bridges/bin/millau/runtime",
+]
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+# make sure dev builds with backtrace do
+# not slow us down
+[profile.dev.package.backtrace]
+opt-level = 3
+
+[profile.release]
+# Catena runtime requires unwinding.
+panic = "unwind"
+
+[features]
+runtime-benchmarks = ["catena-cli/runtime-benchmarks"]
+try-runtime = ["catena-cli/try-runtime"]
+disputes = ["catena-cli/disputes"]
+
+# Configuration for building a .deb package - for use with `cargo-deb`
+[package.metadata.deb]
+name = "catena"
+extended-description = "Catena node in Rust based on the Substrate framework."
+section = "misc"
+maintainer = "martin@parity.io"
+license-file = ["LICENSE", "0"]
+# https://www.debian.org/doc/debian-policy/ch-maintainerscripts.html
+maintainer-scripts = "scripts/packaging/deb-maintainer-scripts"
+assets = [
+  ["target/release/catena", "/usr/bin/", "755"],
+  ["scripts/packaging/catena.service", "/lib/systemd/system/", "644"]
+]
+conf-files = [
+  "/etc/default/catena"
+]
+
+# Configuration for building an .rpm package - for use with `cargo-rpm`
+[package.metadata.rpm]
+package = "catena"
+
+[package.metadata.rpm.cargo]
+buildflags = ["--release"]
+
+[package.metadata.rpm.targets]
+polkadot = { path = "/usr/bin/catena" }
+
+[package.metadata.rpm.files]
+"../scripts/packaging/catena.service" = { path = "/usr/lib/systemd/system/catena.service", mode = "644" }

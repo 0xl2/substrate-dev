@@ -1,0 +1,15 @@
+!.rpm/*
+!.idea/workspace.xml
+
+.idea/
+.vscode/
+**/target/
+runtime/wasm/target/
+data/
+
+**/*.rs.bk
+*.swp
+.wasm-binaries
+**/._*
+.DS_Store
+.cargo
